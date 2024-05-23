@@ -1,3 +1,12 @@
+
+"""
+HOW FUNCTIONS WITH **kwargs ARE TYPED:
+
+            ex. ("tablename", name = 'VARCHAR(255)')
+                                ^          ^
+                        COLUMN NAME       DATA TYPE
+"""
+
 import psycopg2
 
 class PostPie:
@@ -7,6 +16,9 @@ class PostPie:
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
 
     def create_table(self, tableName, **kwargs):
+        
+        """" CREATES A TABLE IF IT DOSENT EXIST ALREADY """
+
         cursor = self.connection.cursor()
 
         columnNames = ", ".join(kwargs.keys())
@@ -20,6 +32,9 @@ class PostPie:
         self.connection.close()
 
     def show_table(self, tableName):
+
+        """" SHOWS ALL TABLE INFORMATION IN THE TERMINAL """
+
         cursor = self.connection.cursor()
 
         cursor.execute(f""" SELECT * FROM {tableName} ;""")
@@ -28,15 +43,16 @@ class PostPie:
         for i in rows:
             print(i)
 
-
         cursor.close()
         self.connection.close()
 
     def show_custom_table_info(self, tableName, *args):
+
+        """" SHOWS TABLE INFORMATION BASED ON *args """
+
         cursor = self.connection.cursor()
 
         columns = ", ".join(args)
-
 
         cursor.execute(f""" SELECT {columns} FROM {tableName};""")
 
@@ -50,6 +66,14 @@ class PostPie:
 
 
     def insert(self, tableName, **kwargs):
+
+        """ INSERTS VALUES INTO A TABLE, **kwargs KEYS ARE USED AS COLUMNS AND VALUES ARE USED AS TABLE DATATYPES
+         
+            ex. ("tablename", name = 'VARCHAR(255)')
+                                ^          ^
+                        COLUMN NAME       DATA TYPE
+        """
+
         cursor = self.connection.cursor()
 
         columns = ", ".join(kwargs.keys())
@@ -62,7 +86,7 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
-    def delete_insert_by_id(self, tableName, id):
+    def delete_row_by_id(self, tableName, id):
         cursor = self.connection.cursor()
 
         cursor.execute(f""" DELETE FROM {tableName} WHERE id = {id}; """)
@@ -76,15 +100,33 @@ class PostPie:
     def drop_table(self, tableName):
         cursor = self.connection.cursor()
 
-        cursor.execute(f""" DROP TABLE {tableName} """)
+        cursor.execute(f""" DROP TABLE {tableName}; """)
 
         self.connection.commit()
 
         self.connection.close()
         cursor.close()
+    
+    def get_by_id(self, tableName, id, column):
+
+        """ RETURNS A SINGLE VALUE BASED ON ID AND column"""
+
+        cursor = self.connection.cursor()
+
+
+        cursor.execute(f""" SELECT  {column} FROM {tableName} WHERE id = {id}; """)
+
+        row = cursor.fetchone()
+
+        cursor.close()
+        self.connection.close()
+
+        return row[0]
+
 
 py = PostPie("localhost", "postgres", "postgres", "MasterGaming1", 5432)
 #py.create_table('postpie', name='VARCHAR(255)')
 
 #py.insert('person', name='Mya Conde', age=19, gender='f')
-py.show_custom_table_info('person', 'id', 'SELECT', 'age')
+name = py.get_by_id('person', 1, 'name')
+print(name)
