@@ -1,7 +1,5 @@
 import psycopg2
 
-# A PostgreSQL table must be created already to use
-
 class PostPie:
 
     # User must Connect to their PostgreSQL server
@@ -16,7 +14,7 @@ class PostPie:
 
         cursor.execute(f""" CREATE TABLE IF NOT EXISTS "{tableName}" ( id SERIAL PRIMARY KEY, {columnNames} {columValues}); """)
 
-        self.connection.commit()
+        self.connection.commit
 
         cursor.close()
         self.connection.close()
@@ -40,8 +38,6 @@ class PostPie:
         columns = ", ".join(kwargs.keys())
         values = ', '.join([f" '{values}'" for values in kwargs.values()])
 
-        print(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """)
-
         cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """)
 
         self.connection.commit()
@@ -49,4 +45,28 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
+    def delete_insert_by_id(self, tableName, id):
+        cursor = self.connection.cursor()
 
+        cursor.execute(f""" DELETE FROM {tableName} WHERE id = {id}; """)
+
+        self.connection.commit()
+
+        self.connection.close()
+        cursor.close()
+
+
+    def drop_table(self, tableName):
+        cursor = self.connection.cursor()
+
+        cursor.execute(f""" DROP TABLE {tableName} """)
+
+        self.connection.commit()
+
+        self.connection.close()
+        cursor.close()
+
+py = PostPie("localhost", "postgres", "postgres", "MasterGaming1", 5432)
+#py.create_table('postpie', name='VARCHAR(255)')
+
+py.insert('person', name='Mya Conde', age=19, gender='f')
