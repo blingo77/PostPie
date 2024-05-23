@@ -19,7 +19,7 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
-    def show_table(self, tableName, **kwargs):
+    def show_table(self, tableName):
         cursor = self.connection.cursor()
 
         cursor.execute(f""" SELECT * FROM {tableName} ;""")
@@ -31,6 +31,23 @@ class PostPie:
 
         cursor.close()
         self.connection.close()
+
+    def show_custom_table_info(self, tableName, *args):
+        cursor = self.connection.cursor()
+
+        columns = ", ".join(args)
+
+
+        cursor.execute(f""" SELECT {columns} FROM {tableName};""")
+
+        rows = cursor.fetchall()
+
+        for i in rows:
+            print(i)
+
+        cursor.close()
+        self.connection.close()
+
 
     def insert(self, tableName, **kwargs):
         cursor = self.connection.cursor()
@@ -69,4 +86,5 @@ class PostPie:
 py = PostPie("localhost", "postgres", "postgres", "MasterGaming1", 5432)
 #py.create_table('postpie', name='VARCHAR(255)')
 
-py.insert('person', name='Mya Conde', age=19, gender='f')
+#py.insert('person', name='Mya Conde', age=19, gender='f')
+py.show_custom_table_info('person', 'id', 'SELECT', 'age')
