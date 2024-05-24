@@ -1,21 +1,20 @@
 def test(**kwargs):
-    columnNames = " ".join(kwargs.keys())
-    columnValues = ' '.join([f" {values}" for values in kwargs.values()])
 
-    columnNames = columnNames.split()
-    columnValues = columnValues.split()
+    columns = " ".join(kwargs.keys())
+    values = ' '.join([f" '{values}'" for values in kwargs.values()])
 
-    print(columnNames)
+    columns = columns.split()
+    values = values.split()
 
-    sqlComand = ''
+    sqlCommand = ""
 
-    for i in range(len(columnNames)):
-        sqlComand += columnNames[i] + " " + columnValues[i] + ' , '
+    for i in range(len(columns)):
+        sqlCommand += columns[i] + " = " + values[i] + " , "
 
-    sqlComand = sqlComand.split()
-    sqlComand[-1] = ''
-    sqlComand = ' '.join(sqlComand)
+    sqlCommand = sqlCommand.split()
+    sqlCommand[-1] = ''
+    sqlCommand = ' '.join(sqlCommand)
 
-    print(sqlComand)
+    print(sqlCommand)
     
-test(name='VARCHAR(255)', age='INT')
+test(name="Brandon", age=12) 

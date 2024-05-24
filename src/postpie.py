@@ -1,4 +1,7 @@
+# %s is only a place holder for column values, not column names
+
 import psycopg2
+import sqlalchemy
 
 class PostPie:
 
@@ -121,28 +124,23 @@ class PostPie:
     
     def get_row_by_id(self, tableName : str, id : int,  *args) -> list:
 
-        cursor = self.connection.cursor()
+        with self.connection.cursor() as cursor:
 
-        columns = ', '.join(args)
+            columns = " , ".join(args) if args else '*'
+            cursor.execute(f""" SELECT {columns} FROM {tableName} WHERE id = %s; """, [id])
 
-        cursor.execute(f""" SELECT {columns} FROM {tableName} WHERE id = {id}; """)
+            return cursor.fetchone()
 
-        values = cursor.fetchone()
+    def update_by_id(self, tableName: str, id : int, **kwargs):
 
-        cursor.close()
-        self.connection.close()
+        with self.connection.cursor() as cursor:
 
-        return list(values)
+            # %s is a placeholer for the column values it will be placed in the string
+            # when the SQL command is executed
+            columns_values = ", ".join([f"{col} = %s" for col in kwargs])
+            print(columns_values)
 
-  
-
-
-py = PostPie("localhost", "postgres", "postgres", "MasterGaming1", 5432)
-#py.create_table('product', name='VARCHAR(255)', price='INT', companyName='VARCHAR(255)')
-#py.insert('product', name='IPhone 15', price=1000, companyName='Apple')
-#py.insert('product', price=500, name='LapTop', companyName='HP')
-#py.show_table('product')
-#py.show_custom_table_info('product', 'name', 'price')
-#price = py.get_by_id('product', 1, 'price')
-#print(price)
-print(py.get_row_by_id('product', 1, '*'))
+            # list(kwargs.values()) holds the dictionary values that will be placed in 
+            # the place holders %s where column_values are, the [id] will placed into id = %s
+            cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [id])
+            self.connection.commit()
