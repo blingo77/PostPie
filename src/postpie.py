@@ -6,7 +6,7 @@ class PostPie:
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
 
-    def create_table(self, tableName, **kwargs):
+    def create_table(self, tableName: str, **kwargs):
         
         """" CREATES A TABLE IF IT DOSENT EXIST ALREADY """
 
@@ -34,7 +34,7 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
-    def show_table(self, tableName):
+    def show_table(self, tableName : str):
 
         """" SHOWS ALL TABLE INFORMATION IN THE TERMINAL """
 
@@ -49,7 +49,7 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
-    def show_custom_table_info(self, tableName, *args):
+    def show_custom_table_info(self, tableName : str, *args):
 
         """" SHOWS TABLE INFORMATION BASED ON *args """
 
@@ -68,7 +68,7 @@ class PostPie:
         self.connection.close()
 
 
-    def insert(self, tableName, **kwargs):
+    def insert(self, tableName : str, **kwargs):
 
         cursor = self.connection.cursor()
 
@@ -82,7 +82,7 @@ class PostPie:
         cursor.close()
         self.connection.close()
 
-    def delete_row_by_id(self, tableName, id):
+    def delete_row_by_id(self, tableName : str, id : int):
         cursor = self.connection.cursor()
 
         cursor.execute(f""" DELETE FROM {tableName} WHERE id = {id}; """)
@@ -93,7 +93,7 @@ class PostPie:
         cursor.close()
 
 
-    def drop_table(self, tableName):
+    def drop_table(self, tableName : str):
         cursor = self.connection.cursor()
 
         cursor.execute(f""" DROP TABLE {tableName}; """)
@@ -103,7 +103,7 @@ class PostPie:
         self.connection.close()
         cursor.close()
     
-    def get_by_id(self, tableName, id, column):
+    def get_by_id(self, tableName : str, id : int, column : str):
 
         """ RETURNS A SINGLE VALUE BASED ON ID AND column"""
 
@@ -118,8 +118,31 @@ class PostPie:
         self.connection.close()
 
         return row[0]
+    
+    def get_row_by_id(self, tableName : str, id : int,  *args) -> list:
+
+        cursor = self.connection.cursor()
+
+        columns = ', '.join(args)
+
+        cursor.execute(f""" SELECT {columns} FROM {tableName} WHERE id = {id}; """)
+
+        values = cursor.fetchone()
+
+        cursor.close()
+        self.connection.close()
+
+        return list(values)
+
+  
 
 
 py = PostPie("localhost", "postgres", "postgres", "MasterGaming1", 5432)
-py.create_table('product', name='VARCHAR(255)', price='INT', companyName='VARCHAR(255)')
-#py.show_table('products')
+#py.create_table('product', name='VARCHAR(255)', price='INT', companyName='VARCHAR(255)')
+#py.insert('product', name='IPhone 15', price=1000, companyName='Apple')
+#py.insert('product', price=500, name='LapTop', companyName='HP')
+#py.show_table('product')
+#py.show_custom_table_info('product', 'name', 'price')
+#price = py.get_by_id('product', 1, 'price')
+#print(price)
+print(py.get_row_by_id('product', 1, '*'))
