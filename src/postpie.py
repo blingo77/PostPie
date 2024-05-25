@@ -72,7 +72,12 @@ class PostPie:
 
             columns = ", ".join(args) if args else "*"
 
-            cursor.execute(f""" SELECT {columns} FROM {tableName} """)
+            try:
+
+                cursor.execute(f""" SELECT {columns} FROM {tableName} """)
+            
+            except psycopg2.errors.UndefinedTable:
+                pass
             
             rows = cursor.fetchall()
 
@@ -152,4 +157,4 @@ class PostPie:
 py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
 #py.create_table('bruh', name="VARCHAR(255)", age='INT')
 #py.show_table('product')
-py.show_custom_table_info('product', 'price', 'name')
+py.show_custom_table_info('productss', 'price', 'name')
