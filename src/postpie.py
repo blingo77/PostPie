@@ -1,5 +1,4 @@
-# %s is only a place holder for column values, not column names
-
+""" %s is used as place holders for column values """
 import psycopg2
 
 class PostPie:
@@ -15,9 +14,12 @@ class PostPie:
 
         with self.connection.cursor() as cursor:
 
+            # column_names will hold both: names of the column and datatype
+            # ex. name DATATYPE(), name DATATYPE, name DATATYPE
             coulmn_names = ", ".join([f"{cols} {kwargs[cols]}" for cols in kwargs])
 
-            # Datatype validation
+            # Checks if the inputed data type is a valid PostgreSQL data type
+            # allowed data types are stored in the allowed_data_types set()
             for col, d_type in kwargs.items():
                 if d_type.startswith("VARCHAR"):
 
