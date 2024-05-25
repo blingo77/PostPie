@@ -6,7 +6,11 @@ class PostPie:
     # User must Connect to their PostgreSQL server
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
-        self.allowed_data_types = ('VARCHAR', 'INT', 'CHAR')
+        self.allowed_data_types = (
+            'VARCHAR', 'INT', 'CHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT',
+            'NUMERIC', 'DECIMAL', 'UUID', 'TIME', 'INTERVAL', 'TIMESTAMP', 'DATE',
+            'REAL', 'BOOLEAN', 'DOUBLE PERCISION'
+            )
 
     def create_table(self, tableName: str, **kwargs):
         
@@ -64,20 +68,16 @@ class PostPie:
 
         """" SHOWS TABLE INFORMATION BASED ON *args """
 
-        cursor = self.connection.cursor()
+        with self.connection.cursor() as cursor:
 
-        columns = ", ".join(args)
+            columns = ", ".join(args) if args else "*"
 
-        cursor.execute(f""" SELECT {columns} FROM {tableName};""")
+            cursor.execute(f""" SELECT {columns} FROM {tableName} """)
+            
+            rows = cursor.fetchall()
 
-        rows = cursor.fetchall()
-
-        for i in rows:
-            print(i)
-
-        cursor.close()
-        self.connection.close()
-
+            for row in rows:
+                print(row)
 
     def insert(self, tableName : str, **kwargs):
 
@@ -117,7 +117,6 @@ class PostPie:
 
         cursor = self.connection.cursor()
 
-
         cursor.execute(f""" SELECT  {column} FROM {tableName} WHERE id = {id}; """)
 
         row = cursor.fetchone()
@@ -151,5 +150,6 @@ class PostPie:
             self.connection.commit()
 
 py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
-py.create_table('bruh', name="VARCHAR(255)", age='INT')
+#py.create_table('bruh', name="VARCHAR(255)", age='INT')
 #py.show_table('product')
+py.show_custom_table_info('product', 'price', 'name')
