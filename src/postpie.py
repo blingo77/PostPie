@@ -1,41 +1,47 @@
 # %s is only a place holder for column values, not column names
 
 import psycopg2
-import sqlalchemy
 
 class PostPie:
 
     # User must Connect to their PostgreSQL server
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
+        self.allowed_data_types = ('VARCHAR', 'INT', 'CHAR')
 
     def create_table(self, tableName: str, **kwargs):
         
         """" CREATES A TABLE IF IT DOSENT EXIST ALREADY """
 
-        cursor = self.connection.cursor()
+        with self.connection.cursor() as cursor:
 
-        columnNames = " ".join(kwargs.keys())
-        columnValues = ' '.join([f" {values}" for values in kwargs.values()])
+            coulmn_names = ", ".join([f"{cols} {kwargs[cols]}" for cols in kwargs])
 
-        columnNames = columnNames.split()
-        columnValues = columnValues.split()
+            # Datatype validation
+            for col, d_type in kwargs.items():
+                if d_type.startswith("VARCHAR"):
 
-        sqlComand = ''
+                    try:
+                        # Grabs the integer value for VARCHAR(###)
+                        vchar_len = int(d_type[8:-1])
 
-        for i in range(len(columnNames)):
-            sqlComand += columnNames[i] + " " + columnValues[i] + ' , '
+                        if vchar_len <= 1 or vchar_len > 255:
+                            raise ValueError
+                        
+                    except ValueError:
+                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
+                    
+                elif d_type not in self.allowed_data_types:
+                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
 
-        sqlComand = sqlComand.split()
-        sqlComand[-1] = ''
-        sqlComand = ' '.join(sqlComand)
-
-        cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( id SERIAL PRIMARY KEY, {sqlComand} ); """)
-
-        self.connection.commit()
-
-        cursor.close()
-        self.connection.close()
+            try:
+                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( id SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
+            
+            except SyntaxError:
+                raise SyntaxError("ERROR! SQL Query could not execute due to a SYNTAX ERROR")
+            
+            print("Table successfully created!")
+            self.connection.commit() 
 
     def show_table(self, tableName : str):
 
@@ -73,17 +79,14 @@ class PostPie:
 
     def insert(self, tableName : str, **kwargs):
 
-        cursor = self.connection.cursor()
+        with self.connection.cursor() as cursor:
 
-        columns = ", ".join(kwargs.keys())
-        values = ', '.join([f" '{values}'" for values in kwargs.values()])
+            values = ", ".join([f"%s" for i in kwargs])
+            columns = ", ".join(kwargs.keys())
 
-        cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """)
+            cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """, list(kwargs.values()))
 
-        self.connection.commit()
-
-        cursor.close()
-        self.connection.close()
+            self.connection.commit()
 
     def delete_row_by_id(self, tableName : str, id : int):
         cursor = self.connection.cursor()
@@ -122,7 +125,7 @@ class PostPie:
 
         return row[0]
     
-    def get_row_by_id(self, tableName : str, id : int,  *args) -> list:
+    def get_row_by_id(self, tableName : str, id : int,  *args) -> tuple:
 
         with self.connection.cursor() as cursor:
 
@@ -144,3 +147,7 @@ class PostPie:
             # the place holders %s where column_values are, the [id] will placed into id = %s
             cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [id])
             self.connection.commit()
+
+py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
+py.create_table('bruh', name="VARCHAR(255)", age='INT')
+#py.show_table('product')
