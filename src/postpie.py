@@ -15,6 +15,7 @@ class PostPie:
     def create_table(self, tableName: str, **kwargs):
         
         # CREATES A TABLE IF IT DOSENT EXIST ALREADY 
+        # A id will be automatically made into the primary key for the table
 
         with self.connection.cursor() as cursor:
 
@@ -161,7 +162,10 @@ class PostPie:
 
             return cursor.fetchone()
 
-    def update_by_id(self, tableName: str, id : int, **kwargs):
+    def update_by_id(self, tableName: str, ID : int, **kwargs):
+
+        # Updates a row by ID
+        #If needing to update an ID, pass the ID by lowercase ID (id)
 
         with self.connection.cursor() as cursor:
 
@@ -172,6 +176,29 @@ class PostPie:
 
             # list(kwargs.values()) holds the dictionary values that will be placed in 
             # the place holders %s where column_values are, the [id] will placed into id = %s
-            cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [id])
+            cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
             self.connection.commit()
+
+    def add_column(self, tableName: str, **kwargs):
+
+        # Adds a colum to an existing table
+
+        with self.connection.cursor() as cursor:
+
+            # colum will look hold the column name then colum data type
+            # Ex. kwargs = name='VARCHAR(255)' -> 'name VARCHAR(255)'
+            column = ", ".join([f"{col} {kwargs[col]}" for col in kwargs])
+
+            try:
+
+                cursor.execute(f""" ALTER TABLE {tableName} ADD COLUMN {column} """)
+
+            except SyntaxError:
+                raise SyntaxError('ERROR! Syntax Error')
+
+            print(f'Column added successfully!')
+            self.connection.commit()
+    
+    def drop_column(self, tableName : str, columnName : str):
+        pass
 
