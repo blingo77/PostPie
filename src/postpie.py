@@ -51,6 +51,10 @@ class PostPie:
 
     def show_table(self, tableName : str):
 
+        # show_table will only print the table to the terminal
+        # this function will not return anything, see/use show_custom_table_info 
+        # to have a table or row returned
+
         with self.connection.cursor() as cursor:
 
             cursor.execute(f""" SELECT * FROM {tableName} ;""")
@@ -87,50 +91,66 @@ class PostPie:
 
     def insert(self, tableName : str, **kwargs):
 
+        # Inserts a new row into a table
+
         with self.connection.cursor() as cursor:
 
+            # The column values will look like '%s, %s, %,s' when passed into the string
             values = ", ".join([f"%s" for i in kwargs])
             columns = ", ".join(kwargs.keys())
 
+            # list(kwargs.values()) will be placed into the %s placeholders on execution
             cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """, list(kwargs.values()))
 
+            print('New row inserted successfully!')
             self.connection.commit()
 
     def delete_row_by_id(self, tableName : str, id : int):
-        cursor = self.connection.cursor()
 
-        cursor.execute(f""" DELETE FROM {tableName} WHERE id = {id}; """)
+        # Deletes a row by row ID
 
-        self.connection.commit()
+        with self.connection.cursor() as cursor:
 
-        self.connection.close()
-        cursor.close()
+            # %s is the place holder for ID, [id] will be passed into %s
+            cursor.execute(f""" DELETE FROM {tableName} WHERE id = %s """, [id])
+
+            print(f'Row {id} deleted successfully!')
+            self.connection.commit()
 
 
     def drop_table(self, tableName : str):
-        cursor = self.connection.cursor()
 
-        cursor.execute(f""" DROP TABLE {tableName}; """)
+        # Deletes all data and the table itself off the planet
+        # Confirms that the user actually wants to drop the table from the planet
+        while True:
+            confirm = input(f"Are you sure you would like to drop table: {tableName}, (Y - Yes / N - No): ").capitalize()
 
-        self.connection.commit()
+            if confirm == 'Y': break
+            else: return
 
-        self.connection.close()
-        cursor.close()
+        with self.connection.cursor() as cursor:
+            cursor.execute(f""" DROP TABLE {tableName} """)
+
+            print(f'Table {tableName} was dropped successfully')
+            self.connection.commit()
+        
     
     def get_by_id(self, tableName : str, id : int, column : str):
 
-        """ RETURNS A SINGLE VALUE BASED ON ID AND column"""
+        # RETURNS A SINGLE VALUE BASED ON ID AND column
+        # ID needs to be a primary key ID
 
-        cursor = self.connection.cursor()
+        with self.connection.cursor() as cursor:
 
-        cursor.execute(f""" SELECT  {column} FROM {tableName} WHERE id = {id}; """)
+            try:
 
-        row = cursor.fetchone()
+                cursor.execute(f""" SELECT  {column} FROM {tableName} WHERE id = %s; """, [id])
+                row = cursor.fetchone()
+                return row[0]
+            
+            except TypeError:
+                raise TypeError('ERROR! ID or COLUMN can not be found')
 
-        cursor.close()
-        self.connection.close()
-
-        return row[0]
     
     def get_row_by_id(self, tableName : str, id : int,  *args) -> tuple:
 
@@ -155,9 +175,3 @@ class PostPie:
             cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [id])
             self.connection.commit()
 
-py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
-#py.create_table('bruh', name="VARCHAR(255)", age='INT')
-#py.show_table('product')
-#py.create_table('product', productName='VARCHAR(255)', price='INT', companyName='VARCHAR(255)', description='TEXT')
-#py.insert('product', productName='IPhone', price=999.99, companyName='Apple', description='A phone that is touch phone!')
-py.show_custom_table_info('product', 'price', where='price > 100')
