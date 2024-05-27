@@ -1,5 +1,6 @@
 # %s is used as place holders for column values 
 import psycopg2
+import errors
 
 class PostPie:
 
@@ -200,5 +201,16 @@ class PostPie:
             self.connection.commit()
     
     def drop_column(self, tableName : str, columnName : str):
-        pass
+        
+        # Drops a column from the table
+        with self.connection.cursor() as cursor:
+
+            try:
+                cursor.execute(f""" ALTER TABLE {tableName} DROP COLUMN {columnName} """)
+
+            except psycopg2.errors.UndefinedColumn:
+                raise errors.ColumnDoesNotExist(tableName=tableName, column=columnName)
+
+            print(f'Column {columnName} dropped successfully!')
+            self.connection.commit()
 
