@@ -1,9 +1,9 @@
-""" %s is used as place holders for column values """
+# %s is used as place holders for column values 
 import psycopg2
 
 class PostPie:
 
-    # User must Connect to their PostgreSQL server
+    # User must Connect to their PostgreSQL server with these credentials
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
         self.allowed_data_types = (
@@ -14,7 +14,7 @@ class PostPie:
 
     def create_table(self, tableName: str, **kwargs):
         
-        """" CREATES A TABLE IF IT DOSENT EXIST ALREADY """
+        # CREATES A TABLE IF IT DOSENT EXIST ALREADY 
 
         with self.connection.cursor() as cursor:
 
@@ -51,31 +51,30 @@ class PostPie:
 
     def show_table(self, tableName : str):
 
-        """" SHOWS ALL TABLE INFORMATION IN THE TERMINAL """
+        with self.connection.cursor() as cursor:
 
-        cursor = self.connection.cursor()
+            cursor.execute(f""" SELECT * FROM {tableName} ;""")
 
-        cursor.execute(f""" SELECT * FROM {tableName} ;""")
+            rows = cursor.fetchall()
+            for i in rows:
+                print(i)
 
-        rows = cursor.fetchall()
-        for i in rows:
-            print(i)
+    def show_custom_table_info(self, tableName : str, *args, where=None) -> tuple:
 
-        cursor.close()
-        self.connection.close()
-
-    def show_custom_table_info(self, tableName : str, *args):
-
-        """" SHOWS TABLE INFORMATION BASED ON *args """
+        # SHOWS TABLE INFORMATION BASED ON *args 
+        # show_custom_table_info also returns the data in the row as a tuple
 
         with self.connection.cursor() as cursor:
 
+            # Joins the columns that are inputed through *args
+            # If there is no arguments passed, '*' will be the column
             columns = ", ".join(args) if args else "*"
+            where_str = "" if where is None else f" WHERE {where}"
 
             try:
+                cursor.execute(f""" SELECT {columns} FROM {tableName} {where_str}""")
 
-                cursor.execute(f""" SELECT {columns} FROM {tableName} """)
-            
+            # No table found or exists error
             except psycopg2.errors.UndefinedTable:
                 pass
             
@@ -83,6 +82,8 @@ class PostPie:
 
             for row in rows:
                 print(row)
+
+            return rows
 
     def insert(self, tableName : str, **kwargs):
 
@@ -157,4 +158,6 @@ class PostPie:
 py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
 #py.create_table('bruh', name="VARCHAR(255)", age='INT')
 #py.show_table('product')
-py.show_custom_table_info('productss', 'price', 'name')
+#py.create_table('product', productName='VARCHAR(255)', price='INT', companyName='VARCHAR(255)', description='TEXT')
+#py.insert('product', productName='IPhone', price=999.99, companyName='Apple', description='A phone that is touch phone!')
+py.show_custom_table_info('product', 'price', where='price > 100')
