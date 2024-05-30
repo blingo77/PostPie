@@ -1,3 +1,7 @@
+# test.py
+# Copyright (C) 2024 the PostPie developers
+# (See DEVELOPERS FILE)
+
 def test(**kwargs):
 
     columns = " ".join(kwargs.keys())

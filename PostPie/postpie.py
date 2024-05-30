@@ -1,4 +1,7 @@
-# %s is used as place holders for column values 
+# postpie.py
+# Copyright (C) 2024 the PostPie developers
+# (See DEVELOPERS FILE)
+ 
 import psycopg2
 import errors
 
@@ -213,4 +216,3 @@ class PostPie:
 
             print(f'Column {columnName} dropped successfully!')
             self.connection.commit()
-
