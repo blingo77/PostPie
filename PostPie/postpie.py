@@ -216,3 +216,53 @@ class PostPie:
 
             print(f'Column {columnName} dropped successfully!')
             self.connection.commit()
+
+    def create_foreign_key_table(self, tableName, fk_name=None, **kwargs):
+
+        # The Foriegn Key must be an ID which is a primary key
+        
+        # The Foriegn Key must be formatted as follows: 
+        # Contains the tables name followed by _id
+        # Ex: user_id
+
+        if fk_name == None:
+            raise TypeError("ERROR! No foreign key was provided")
+
+        with self.connection.cursor() as cursor:
+
+            columns = ", ".join([f'{col} {kwargs[col]} ' for col in kwargs])
+            fk_alterName = ''
+
+            # Grabs the name of the foriegn key without the _id part
+            for i in fk_name:
+                if i == '_':
+                    break
+                fk_alterName += i
+
+            for col, d_type in kwargs.items():
+                if d_type.startswith("VARCHAR"):
+
+                    try:
+                        # Grabs the integer value for VARCHAR(###)
+                        vchar_len = int(d_type[8:-1])
+
+                        if vchar_len <= 1 or vchar_len > 255:
+                            raise ValueError
+                        
+                    except ValueError:
+                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
+                    
+                elif d_type not in self.allowed_data_types:
+                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
+
+            try:
+                cursor.execute(f""" CREATE TABLE {tableName} ( id SERIAL PRIMARY KEY, {columns}, 
+                            {fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id)); """)
+            except:
+                pass
+            
+            print(f'Table with foreign key successfully created!')
+            self.connection.commit()
+    
+    def add_foreign_key(self, tableName, fk_name=None):
+        pass
