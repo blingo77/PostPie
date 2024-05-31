@@ -7,6 +7,23 @@ import errors
 
 class PostPie:
 
+    """ 
+    The PostPie object is powered by the psycopg2 driver library to connect and
+    execute PostgreSQL code. All main functions can be found under the PostPie object.
+
+    Users must connect to their PostgreSQL database in the following way:
+
+    Ex: py = PostPie(host_name='', db_name='', db_user='', db_password='', db_port='')
+
+    Replace '' with the according database credentials.
+
+    Any function that has **kwargs, the KEY should be the column name and
+    the VALUE should be the datatype for the column or the value according
+    to the function that is being used.
+
+    Ex: name='VARCHAR(255)' OR name='John Doe'
+    """
+
     # User must Connect to their PostgreSQL server with these credentials
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
