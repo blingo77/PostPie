@@ -1,3 +1,10 @@
+Metadata-Version: 2.1
+Name: PostPie
+Version: 1.0.1
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: psycopg2-binary>=2.9.9
+
 # PostPie
 Python Toolkit / Object Relational Mapper (ORM) for PostgreSQL
 

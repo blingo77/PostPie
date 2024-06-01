@@ -3,7 +3,9 @@
 # (See DEVELOPERS FILE)
  
 import psycopg2
-import errors
+
+def hello():
+    print('hello')
 
 class PostPie:
 
@@ -193,7 +195,6 @@ class PostPie:
             # %s is a placeholer for the column values it will be placed in the string
             # when the SQL command is executed
             columns_values = ", ".join([f"{col} = %s" for col in kwargs])
-            print(columns_values)
 
             # list(kwargs.values()) holds the dictionary values that will be placed in 
             # the place holders %s where column_values are, the [id] will placed into id = %s
@@ -229,7 +230,7 @@ class PostPie:
                 cursor.execute(f""" ALTER TABLE {tableName} DROP COLUMN {columnName} """)
 
             except psycopg2.errors.UndefinedColumn:
-                raise errors.ColumnDoesNotExist(tableName=tableName, column=columnName)
+                raise psycopg2.errors.UndefinedColumn
 
             print(f'Column {columnName} dropped successfully!')
             self.connection.commit()
@@ -276,10 +277,26 @@ class PostPie:
                 cursor.execute(f""" CREATE TABLE {tableName} ( id SERIAL PRIMARY KEY, {columns}, 
                             {fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id)); """)
             except:
-                pass
+                print()
             
             print(f'Table with foreign key successfully created!')
             self.connection.commit()
     
     def add_foreign_key(self, tableName, fk_name=None):
-        pass
+        
+        with self.connection.cursor() as cursor:
+
+            fk_alterName = ''
+
+            # Grabs the name of the foriegn key without the _id part
+            for i in fk_name:
+                if i == '_':
+                    break
+                fk_alterName += i
+
+            cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id)""")
+
+            self.connection.commit()
+
+py = PostPie(host_name='localhost', db_name='postgres', db_user='postgres', db_password='MasterGaming1',db_port=5432)
+py.show_table('customer')
