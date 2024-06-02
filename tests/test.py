@@ -2,6 +2,9 @@
 # Copyright (C) 2024 the PostPie developers
 # (See DEVELOPERS FILE)
 
+import PostPie
+
+
 def test(**kwargs):
 
     columns = " ".join(kwargs.keys())

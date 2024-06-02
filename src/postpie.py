@@ -4,8 +4,6 @@
  
 import psycopg2
 
-def hello():
-    print('hello')
 
 class PostPie:
 
