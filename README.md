@@ -3,7 +3,7 @@ Python Toolkit / Object Relational Mapper (ORM) for PostgreSQL
 
 ## Introduction
 PostPie is a lightweight Python Toolkit or Object-Relational Mapper (ORM) for PostgreSQL. PostPie makes communicating and querying to a PostgreSQL database easy and very simple. PostPie aims to take the complexity and learning curve away from other ORM's by utilizing an intuitive
-interface. PostPie is designed for small to medium level projects and is aimed at developers who are begginers to working with database's. PostPie is powered by the psycopg2 driver.
+interface. PostPie is designed for small to medium level projects and is aimed at developers who are beginners to working with database's. PostPie is powered by the psycopg2 driver.
 
 ## Instillation
 
@@ -13,6 +13,7 @@ interface. PostPie is designed for small to medium level projects and is aimed a
 ## Get Started
 
 **Simply import postpie at the top of your python file:** ``` import PostPie ``` <br> <br>
+** Its recommended that you import it as: ** ``` from PostPie import PostPie ``` <br> <br>
  Next you will need to connect your PostgreSQL database to PostPie. This step is also very easy, make sure you have the following:
  * Host Name
  * Database Name
