@@ -4,9 +4,6 @@
  
 import psycopg2
 
-def hello():
-    print('hello')
-
 class PostPie:
 
     """ 
@@ -257,6 +254,8 @@ class PostPie:
                     break
                 fk_alterName += i
 
+            fk = ", ".join([f'{fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id))'])
+
             for col, d_type in kwargs.items():
                 if d_type.startswith("VARCHAR"):
 
@@ -275,7 +274,7 @@ class PostPie:
 
             try:
                 cursor.execute(f""" CREATE TABLE {tableName} ( id SERIAL PRIMARY KEY, {columns}, 
-                            {fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id)); """)
+                            {fk}; """)
             except:
                 print()
             
@@ -294,9 +293,6 @@ class PostPie:
                     break
                 fk_alterName += i
 
-            cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id)""")
+            cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
 
             self.connection.commit()
-
-py = PostPie(host_name='localhost', db_name='postgres', db_user='postgres', db_password='MasterGaming1',db_port=5432)
-py.show_table('customer')

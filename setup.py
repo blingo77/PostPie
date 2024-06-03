@@ -5,7 +5,7 @@ with open("README.md", "r") as i:
 
 setup(
     name='PostPie',
-    version='1.0.1',
+    version='1.0.2',
     packages=find_packages(),
     install_requires=[
         'psycopg2-binary>=2.9.9'

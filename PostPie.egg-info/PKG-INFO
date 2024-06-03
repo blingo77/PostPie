@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: PostPie
-Version: 1.0.1
+Version: 1.0.2
 Description-Content-Type: text/markdown
 License-File: LICENSE.txt
 Requires-Dist: psycopg2-binary>=2.9.9
@@ -10,7 +10,7 @@ Python Toolkit / Object Relational Mapper (ORM) for PostgreSQL
 
 ## Introduction
 PostPie is a lightweight Python Toolkit or Object-Relational Mapper (ORM) for PostgreSQL. PostPie makes communicating and querying to a PostgreSQL database easy and very simple. PostPie aims to take the complexity and learning curve away from other ORM's by utilizing an intuitive
-interface. PostPie is designed for small to medium level projects and is aimed at developers who are begginers to working with database's. PostPie is powered by the psycopg2 driver.
+interface. PostPie is designed for small to medium-level projects and is aimed at developers who are beginners to working with databases. PostPie is powered by the psycopg2 driver.
 
 ## Instillation
 
@@ -19,16 +19,17 @@ interface. PostPie is designed for small to medium level projects and is aimed a
 
 ## Get Started
 
-**Simply import postpie at the top of your python file:** ``` import PostPie ``` <br> <br>
- Next you will need to connect your PostgreSQL database to PostPie. This step is also very easy, make sure you have the following:
+**Simply import Postpie at the top of your Python file:** ``` import PostPie ``` <br> <br>
+**Its recommended you import PostPie as:** ``` from PostPie import PostPie ``` <br> <br>
+ Next, you will need to connect your PostgreSQL database to PostPie. This step is also very easy, make sure you have the following:
  * Host Name
  * Database Name
  * Database Username
  * Database Password
  * Database Port Number
 
-Next you will need to create an instance of the PostPie class (all PostPie functions can be found in this class) Ex: ``` py = PostPie.PostPie() ``` <br>
-Enter in database credientals the following way into the PostPie class: <br><br> * ``` py = PostPie.PostPie(host_name='HOST NAME', db_name='DB NAME', user='DB USERNAME', password='PASSWORD', port='PORT NUMBER``` <br><br>
+Next, you will need to create an instance of the PostPie class (all PostPie functions can be found in this class) Ex: ``` py = PostPie.PostPie() ``` <br>
+Enter in database credentials the following way into the PostPie class: <br><br> * ``` py = PostPie.PostPie(host_name='HOST NAME', db_name='DB NAME', user='DB USERNAME', password='PASSWORD', port='PORT NUMBER``` <br><br>
 Now you should be connected to your database and can start using the PostPie ORM!
 
 ## License
