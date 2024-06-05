@@ -3,7 +3,7 @@
 # (See DEVELOPERS FILE)
  
 import psycopg2
-from dataValidator import AllowedDataType
+from dataValidator import check_data_types
 
 class PostPie:
 
@@ -27,11 +27,7 @@ class PostPie:
     # User must Connect to their PostgreSQL server with these credentials
     def __init__(self, host_name, db_name, db_user, db_password, db_port):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
-        self.allowed_data_types = (
-            'VARCHAR', 'INT', 'CHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT',
-            'NUMERIC', 'DECIMAL', 'UUID', 'TIME', 'INTERVAL', 'TIMESTAMP', 'DATE',
-            'REAL', 'BOOLEAN', 'DOUBLE PERCISION'
-            )
+
 
     def create_table(self, tableName : str, id : str = None, **kwargs):
         
@@ -48,23 +44,8 @@ class PostPie:
             coulmn_names = ", ".join([f"{cols} {kwargs[cols]}" for cols in kwargs])
 
             # Checks if the inputed data type is a valid PostgreSQL data type
-            # allowed data types are stored in the allowed_data_types set()
-
-            for col, d_type in kwargs.items():
-                if d_type.startswith("VARCHAR"):
-
-                    try:
-                        # Grabs the integer value for VARCHAR(###)
-                        vchar_len = int(d_type[8:-1])
-
-                        if vchar_len <= 1 or vchar_len > 255:
-                            raise ValueError
-                        
-                    except ValueError:
-                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
-                    
-                elif d_type not in self.allowed_data_types:
-                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
+            # see src/dataValidator.py for more information
+            check_data_types(kwargs=kwargs)
 
             try:
                 cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( {ID} SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
@@ -155,6 +136,7 @@ class PostPie:
             else: return
 
         with self.connection.cursor() as cursor:
+
             cursor.execute(f""" DROP TABLE {tableName} """)
 
             print(f'Table {tableName} was dropped successfully')
@@ -262,27 +244,13 @@ class PostPie:
 
             fk = ", ".join([f'{fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id))'])
 
-            for col, d_type in kwargs.items():
-                if d_type.startswith("VARCHAR"):
-
-                    try:
-                        # Grabs the integer value for VARCHAR(###)
-                        vchar_len = int(d_type[8:-1])
-
-                        if vchar_len <= 1 or vchar_len > 255:
-                            raise ValueError
-                        
-                    except ValueError:
-                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
-                    
-                elif d_type not in self.allowed_data_types:
-                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
+            check_data_types(kwargs=kwargs)
 
             try:
                 cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, 
                             {fk}; """)
             except:
-                print()
+                print("ERROR! Table was not able to be created!")
             
             print(f'Table with foreign key successfully created!')
             self.connection.commit()

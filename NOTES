@@ -1,0 +1,8 @@
+Notes for any changes or updates to the code
+--------------------------------------------
+
+PostPie 1.1.0
+*************
+
+- Add custom names for ID primary keys when creating a new table
+- Add data validator for data types
