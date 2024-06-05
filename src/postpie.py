@@ -3,6 +3,7 @@
 # (See DEVELOPERS FILE)
  
 import psycopg2
+from dataValidator import AllowedDataType
 
 class PostPie:
 
@@ -32,12 +33,15 @@ class PostPie:
             'REAL', 'BOOLEAN', 'DOUBLE PERCISION'
             )
 
-    def create_table(self, tableName: str, **kwargs):
+    def create_table(self, tableName : str, id : str = None, **kwargs):
         
         # CREATES A TABLE IF IT DOSENT EXIST ALREADY 
         # A id will be automatically made into the primary key for the table
 
         with self.connection.cursor() as cursor:
+
+            # Allows user to create a custom name for the ID primary key
+            ID = id if id else "id"
 
             # column_names will hold both: names of the column and datatype
             # ex. name DATATYPE(), name DATATYPE, name DATATYPE
@@ -45,6 +49,7 @@ class PostPie:
 
             # Checks if the inputed data type is a valid PostgreSQL data type
             # allowed data types are stored in the allowed_data_types set()
+
             for col, d_type in kwargs.items():
                 if d_type.startswith("VARCHAR"):
 
@@ -62,7 +67,7 @@ class PostPie:
                     raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
 
             try:
-                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( id SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
+                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( {ID} SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
             
             except SyntaxError:
                 raise SyntaxError("ERROR! SQL Query could not execute due to a SYNTAX ERROR")
@@ -232,7 +237,7 @@ class PostPie:
             print(f'Column {columnName} dropped successfully!')
             self.connection.commit()
 
-    def create_foreign_key_table(self, tableName, fk_name=None, **kwargs):
+    def create_foreign_key_table(self, tableName, id : str = None, fk_name=None, **kwargs):
 
         # The Foriegn Key must be an ID which is a primary key
         
@@ -245,6 +250,7 @@ class PostPie:
 
         with self.connection.cursor() as cursor:
 
+            ID = id if id else "id"
             columns = ", ".join([f'{col} {kwargs[col]} ' for col in kwargs])
             fk_alterName = ''
 
@@ -273,7 +279,7 @@ class PostPie:
                     raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
 
             try:
-                cursor.execute(f""" CREATE TABLE {tableName} ( id SERIAL PRIMARY KEY, {columns}, 
+                cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, 
                             {fk}; """)
             except:
                 print()
