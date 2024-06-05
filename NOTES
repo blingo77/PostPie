@@ -6,3 +6,4 @@ PostPie 1.1.0
 
 - Add custom names for ID primary keys when creating a new table
 - Add data validator for data types
+- Add a custom query function

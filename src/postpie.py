@@ -267,6 +267,22 @@ class PostPie:
                     break
                 fk_alterName += i
 
-            cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
+            try:
 
+                cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
+            except:
+                print('ERROR! Foreign key wasnt able to be added!')
+
+            print(f'Foreign Key added to table: {tableName}')
             self.connection.commit()
+    
+    def self_query(self, sqlCommand : str):
+
+        # Allows for custom SQL code to be written
+
+        with self.connection.cursor() as cursor:
+
+            try:
+                cursor.execute(sqlCommand)
+            except:
+                print("ERROR! SQL Command was not able to be executed!")

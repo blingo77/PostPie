@@ -33,3 +33,4 @@ def check_data_types(kwargs : dict):
                     
         elif d_type not in allowed_data_types:
             raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
+
