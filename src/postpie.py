@@ -286,3 +286,6 @@ class PostPie:
                 cursor.execute(sqlCommand)
             except:
                 print("ERROR! SQL Command was not able to be executed!")
+        
+        print("SQL Command was successfully executed! ")
+        self.connection.commit()
