@@ -269,9 +269,11 @@ class PostPie:
 
             try:
 
-                cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
+                # Adds the fk_name as a column into the table first before creating the foreign key
+                cursor.execute(f""" ALTER TABLE {tableName} ADD COLUMN {fk_name} INT, 
+                               ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
             except:
-                print('ERROR! Foreign key wasnt able to be added!')
+                raise('ERROR! Foreign key wasnt able to be added!')
 
             print(f'Foreign Key added to table: {tableName}')
             self.connection.commit()
@@ -286,3 +288,6 @@ class PostPie:
                 cursor.execute(sqlCommand)
             except:
                 print("ERROR! SQL Command was not able to be executed!")
+        
+            print("SQL command was executed successfully!")
+            self.connection.commit()
