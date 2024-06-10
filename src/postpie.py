@@ -48,7 +48,8 @@ class PostPie:
             check_data_types(kwargs=kwargs)
 
             try:
-                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( {ID} SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
+                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName}
+                                ( {ID} SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
             
             except SyntaxError:
                 raise SyntaxError("ERROR! SQL Query could not execute due to a SYNTAX ERROR")
@@ -87,7 +88,9 @@ class PostPie:
 
             # No table found or exists error
             except psycopg2.errors.UndefinedTable:
-                pass
+                raise (f'ERROR! Table : {tableName} can not be found, check if it exists')
+            except:
+                raise ('ERROR! An error occured trying to execute the query')
             
             rows = cursor.fetchall()
 
@@ -107,7 +110,8 @@ class PostPie:
             columns = ", ".join(kwargs.keys())
 
             # list(kwargs.values()) will be placed into the %s placeholders on execution
-            cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """, list(kwargs.values()))
+            cursor.execute(f""" INSERT INTO {tableName} 
+                           ({columns}) VALUES ({values}); """, list(kwargs.values()))
 
             print('New row inserted successfully!')
             self.connection.commit()
@@ -182,7 +186,8 @@ class PostPie:
 
             # list(kwargs.values()) holds the dictionary values that will be placed in 
             # the place holders %s where column_values are, the [id] will placed into id = %s
-            cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
+            cursor.execute( f"UPDATE {tableName} 
+                           SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
             self.connection.commit()
 
     def add_column(self, tableName: str, **kwargs):
@@ -247,8 +252,7 @@ class PostPie:
             check_data_types(kwargs=kwargs)
 
             try:
-                cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, 
-                            {fk}; """)
+                cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, {fk}; """)
             except:
                 print("ERROR! Table was not able to be created!")
             
