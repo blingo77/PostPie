@@ -5,6 +5,7 @@
 import psycopg2
 from dataValidator import check_data_types
 
+
 class PostPie:
     """ 
     The PostPie object is powered by the psycopg2 driver library to connect and
@@ -294,3 +295,6 @@ class PostPie:
         
             print("SQL command was executed successfully!")
             self.connection.commit()
+
+def join(self):
+    pass
