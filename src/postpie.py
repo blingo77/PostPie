@@ -296,5 +296,11 @@ class PostPie:
             print("SQL command was executed successfully!")
             self.connection.commit()
 
-def join(self):
-    pass
+    def join(self, tableName):
+
+        # Tables that are being joined need to have a relationship
+        # so that the join can work properly.
+        # The Join will be use the table names ID to look up if they are
+        # in both tables
+
+        pass
