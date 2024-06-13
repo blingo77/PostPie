@@ -71,7 +71,7 @@ class PostPie:
             for i in rows:
                 print(i)
 
-    def show_custom_table_info(self, tableName : str, *args, where=None) -> tuple:
+    def show_custom_table_info(self, tableName : str, *args, where=None, distinct : bool = None) -> tuple:
 
         # SHOWS TABLE INFORMATION BASED ON *args 
         # show_custom_table_info also returns the data in the row as a tuple
@@ -82,9 +82,10 @@ class PostPie:
             # If there is no arguments passed, '*' will be the column
             columns = ", ".join(args) if args else "*"
             where_str = "" if where is None else f" WHERE {where}"
+            distinct = "" if distinct is None else 'DISTINCT'
 
             try:
-                cursor.execute(f""" SELECT {columns} FROM {tableName} {where_str}""")
+                cursor.execute(f""" SELECT {distinct} {columns} FROM {tableName} {where_str}""")
 
             # No table found or exists error
             except psycopg2.errors.UndefinedTable:
