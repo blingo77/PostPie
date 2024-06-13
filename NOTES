@@ -8,3 +8,5 @@ PostPie 1.1.0
 - Add data validator for data types
 - Add a custom query function
 - Fix add fk to table to where they dont need to add the name to the table first anymore
+- Add distinct look up option for show_custom_table_info
+- Add Joins

@@ -6,7 +6,6 @@ import psycopg2
 from dataValidator import check_data_types
 
 class PostPie:
-
     """ 
     The PostPie object is powered by the psycopg2 driver library to connect and
     execute PostgreSQL code. All main functions can be found under the PostPie object.
@@ -25,9 +24,8 @@ class PostPie:
     """
 
     # User must Connect to their PostgreSQL server with these credentials
-    def __init__(self, host_name, db_name, db_user, db_password, db_port):
+    def __init__(self, host_name : str, db_name : str, db_user : str, db_password : str, db_port : int):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
-
 
     def create_table(self, tableName : str, id : str = None, **kwargs):
         
@@ -187,8 +185,8 @@ class PostPie:
 
             # list(kwargs.values()) holds the dictionary values that will be placed in 
             # the place holders %s where column_values are, the [id] will placed into id = %s
-            cursor.execute( f"UPDATE {tableName} 
-                           SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
+            cursor.execute( f"UPDATE {tableName}  SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
+
             self.connection.commit()
 
     def add_column(self, tableName: str, **kwargs):
