@@ -296,11 +296,24 @@ class PostPie:
             print("SQL command was executed successfully!")
             self.connection.commit()
 
-    def join(self, tableName):
+    def join(self, tableName : str, tables : list, on : str, where : str, *args : str):
 
         # Tables that are being joined need to have a relationship
         # so that the join can work properly.
         # The Join will be use the table names ID to look up if they are
         # in both tables
 
-        pass
+        with self.connection.cursor() as cursor:
+            
+            columns = ", ".join(args) if args else '*'
+            tables = " ".join(f'JOIN {table} ON {on}' for table in tables)
+            WHERE = f"WHERE {where}" if where else ""
+
+            print(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
+
+          #  cursor.execute(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
+            
+            self.connection.commit()
+
+py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
+py.join('customer', ['orders'], 'orders.id = customer.id', 'state = 1', 'name')
