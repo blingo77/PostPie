@@ -69,6 +69,8 @@ class PostPie:
             rows = cursor.fetchall()
             for i in rows:
                 print(i)
+            
+            return rows
 
     def show_custom_table_info(self, tableName : str, *args, where=None, distinct : bool = None) -> tuple:
 
@@ -147,12 +149,14 @@ class PostPie:
             self.connection.commit()
         
     
-    def get_by_id(self, tableName : str, id : int, column : str):
+    def get_by_id(self, tableName : str, id : int, column : str = None):
 
         # RETURNS A SINGLE VALUE BASED ON ID AND column
         # ID needs to be a primary key ID
 
         with self.connection.cursor() as cursor:
+
+            column = "" if column is None else "*"
 
             try:
 
@@ -168,6 +172,7 @@ class PostPie:
 
         with self.connection.cursor() as cursor:
 
+            # args should be the names of the columns that are being requested
             columns = " , ".join(args) if args else '*'
             cursor.execute(f""" SELECT {columns} FROM {tableName} WHERE id = %s; """, [id])
 
@@ -320,3 +325,6 @@ class PostPie:
             self.connection.commit()
 
             return join_info
+
+#py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
+#py.show_table('customer')

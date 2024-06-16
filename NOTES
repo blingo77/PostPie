@@ -1,5 +1,5 @@
-Notes for any changes or updates to the code
---------------------------------------------
+Notes for any changes or updates
+--------------------------------
 
 PostPie 1.1.0
 *************
@@ -10,3 +10,5 @@ PostPie 1.1.0
 - Fix add fk to table to where they dont need to add the name to the table first anymore
 - Add distinct look up option for show_custom_table_info
 - Add Joins
+- Add ability to create csv files from table rows
+- Update get_by_id to allow column to be an empty argument
