@@ -41,8 +41,8 @@ def check_for_string(arg : str):
     # Psycopg2 will automatically add single quotes around a string
     # during execution of a SQL query.
 
-    # Ex: State = NV --> True
-    #     State = 1 --> False
+    # Ex: 'State = NV' --> return True
+    #     'State = 1' --> return False
 
     arg = arg.split()
     arg = "".join(arg)
@@ -53,4 +53,21 @@ def check_for_string(arg : str):
                 return True
             else:
                 return False
+            
+def check_for_int(arg : str):
 
+    # Makes sure if a input for a query is a integer
+    # Only needed if the specific query requires a integer input
+
+    # Ex: 'id = 1' --> return True
+    # Ex: 'id = AZ' --> return False
+
+    arg = arg.split()
+    arg = "".join(arg)
+
+    for i in range(len(arg)):
+        if arg[i] == '=':
+            if arg[i + 1].isdigit():
+                return True
+            else:
+                return False
