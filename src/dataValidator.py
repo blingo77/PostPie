@@ -34,9 +34,23 @@ def check_data_types(kwargs : dict):
         elif d_type not in allowed_data_types:
             raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
 
-def check_for_string(arg):
+def check_for_string(arg : str):
+
+    # Makes sure if a input for a query is a string
+    # Only needed if the specific query requires a string input
+    # Psycopg2 will automatically add single quotes around a string
+    # during execution of a SQL query.
+
+    # Ex: State = NV --> True
+    #     State = 1 --> False
+
+    arg = arg.split()
+    arg = "".join(arg)
 
     for i in range(len(arg)):
         if arg[i] == '=':
-            pass
+            if arg[i + 1].isalpha():
+                return True
+            else:
+                return False
 

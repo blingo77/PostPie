@@ -4,7 +4,7 @@
  
 import psycopg2
 from dataValidator import check_data_types
-
+from dataValidator import check_for_string
 
 class PostPie:
     """ 
@@ -251,10 +251,8 @@ class PostPie:
 
             check_data_types(kwargs=kwargs)
 
-            try:
-                cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, {fk}; """)
-            except:
-                print("ERROR! Table was not able to be created!")
+            cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, {fk}; """)
+                #raise("ERROR! Table was not able to be created!")
             
             print(f'Table with foreign key successfully created!')
             self.connection.commit()
@@ -296,24 +294,29 @@ class PostPie:
             print("SQL command was executed successfully!")
             self.connection.commit()
 
-    def join(self, tableName : str, tables : list, on : str, where : str, *args : str):
+    def join(self, tableName : str, tables : list, on : str, where : str, *args : str) -> tuple:
 
         # Tables that are being joined need to have a relationship
         # so that the join can work properly.
         # The Join will be use the table names ID to look up if they are
         # in both tables
 
+        # Where and columns are optional inputs, they will be automatically handled if not entered
+        # Example for on: on = 'customer.orderID = orderID.orderID'
+
+
         with self.connection.cursor() as cursor:
-            
+
+            # formats the query so its a correct SQL query
+            WHERE = f"WHERE {where}" if where else ""                
             columns = ", ".join(args) if args else '*'
             tables = " ".join(f'JOIN {table} ON {on}' for table in tables)
-            WHERE = f"WHERE {where}" if where else ""
 
-            print(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
 
-          #  cursor.execute(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
+            cursor.execute(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
+            
+            join_info = cursor.fetchall()
             
             self.connection.commit()
 
-py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
-py.join('customer', ['orders'], 'orders.id = customer.id', 'state = 1', 'name')
+            return join_info
