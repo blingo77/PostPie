@@ -7,7 +7,9 @@ PostPie.egg-info/dependency_links.txt
 PostPie.egg-info/requires.txt
 PostPie.egg-info/top_level.txt
 src/__init__.py
+src/dataValidator.py
 src/display.py
 src/errors.py
 src/postpie.py
+src/test.py
 tests/test.py

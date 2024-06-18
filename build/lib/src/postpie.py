@@ -3,9 +3,10 @@
 # (See DEVELOPERS FILE)
  
 import psycopg2
+from dataValidator import check_data_types
+from dataValidator import check_for_string
 
 class PostPie:
-
     """ 
     The PostPie object is powered by the psycopg2 driver library to connect and
     execute PostgreSQL code. All main functions can be found under the PostPie object.
@@ -24,45 +25,30 @@ class PostPie:
     """
 
     # User must Connect to their PostgreSQL server with these credentials
-    def __init__(self, host_name, db_name, db_user, db_password, db_port):
+    def __init__(self, host_name : str, db_name : str, db_user : str, db_password : str, db_port : int):
         self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
-        self.allowed_data_types = (
-            'VARCHAR', 'INT', 'CHAR', 'TEXT', 'INTEGER', 'BIGINT', 'SMALLINT',
-            'NUMERIC', 'DECIMAL', 'UUID', 'TIME', 'INTERVAL', 'TIMESTAMP', 'DATE',
-            'REAL', 'BOOLEAN', 'DOUBLE PERCISION'
-            )
 
-    def create_table(self, tableName: str, **kwargs):
+    def create_table(self, tableName : str, id : str = None, **kwargs):
         
         # CREATES A TABLE IF IT DOSENT EXIST ALREADY 
         # A id will be automatically made into the primary key for the table
 
         with self.connection.cursor() as cursor:
 
+            # Allows user to create a custom name for the ID primary key
+            ID = id if id else "id"
+
             # column_names will hold both: names of the column and datatype
             # ex. name DATATYPE(), name DATATYPE, name DATATYPE
             coulmn_names = ", ".join([f"{cols} {kwargs[cols]}" for cols in kwargs])
 
             # Checks if the inputed data type is a valid PostgreSQL data type
-            # allowed data types are stored in the allowed_data_types set()
-            for col, d_type in kwargs.items():
-                if d_type.startswith("VARCHAR"):
-
-                    try:
-                        # Grabs the integer value for VARCHAR(###)
-                        vchar_len = int(d_type[8:-1])
-
-                        if vchar_len <= 1 or vchar_len > 255:
-                            raise ValueError
-                        
-                    except ValueError:
-                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
-                    
-                elif d_type not in self.allowed_data_types:
-                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
+            # see src/dataValidator.py for more information
+            check_data_types(kwargs=kwargs)
 
             try:
-                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName} ( id SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
+                cursor.execute(f""" CREATE TABLE IF NOT EXISTS {tableName}
+                                ( {ID} SERIAL PRIMARY KEY, {coulmn_names}) """, list(kwargs.values()))
             
             except SyntaxError:
                 raise SyntaxError("ERROR! SQL Query could not execute due to a SYNTAX ERROR")
@@ -83,8 +69,10 @@ class PostPie:
             rows = cursor.fetchall()
             for i in rows:
                 print(i)
+            
+            return rows
 
-    def show_custom_table_info(self, tableName : str, *args, where=None) -> tuple:
+    def show_custom_table_info(self, tableName : str, *args, where=None, distinct : bool = None) -> tuple:
 
         # SHOWS TABLE INFORMATION BASED ON *args 
         # show_custom_table_info also returns the data in the row as a tuple
@@ -95,13 +83,16 @@ class PostPie:
             # If there is no arguments passed, '*' will be the column
             columns = ", ".join(args) if args else "*"
             where_str = "" if where is None else f" WHERE {where}"
+            distinct = "" if distinct is None else 'DISTINCT'
 
             try:
-                cursor.execute(f""" SELECT {columns} FROM {tableName} {where_str}""")
+                cursor.execute(f""" SELECT {distinct} {columns} FROM {tableName} {where_str}""")
 
             # No table found or exists error
             except psycopg2.errors.UndefinedTable:
-                pass
+                raise (f'ERROR! Table : {tableName} can not be found, check if it exists')
+            except:
+                raise ('ERROR! An error occured trying to execute the query')
             
             rows = cursor.fetchall()
 
@@ -121,7 +112,8 @@ class PostPie:
             columns = ", ".join(kwargs.keys())
 
             # list(kwargs.values()) will be placed into the %s placeholders on execution
-            cursor.execute(f""" INSERT INTO {tableName} ({columns}) VALUES ({values}); """, list(kwargs.values()))
+            cursor.execute(f""" INSERT INTO {tableName} 
+                           ({columns}) VALUES ({values}); """, list(kwargs.values()))
 
             print('New row inserted successfully!')
             self.connection.commit()
@@ -150,18 +142,21 @@ class PostPie:
             else: return
 
         with self.connection.cursor() as cursor:
+
             cursor.execute(f""" DROP TABLE {tableName} """)
 
             print(f'Table {tableName} was dropped successfully')
             self.connection.commit()
         
     
-    def get_by_id(self, tableName : str, id : int, column : str):
+    def get_by_id(self, tableName : str, id : int, column : str = None):
 
         # RETURNS A SINGLE VALUE BASED ON ID AND column
         # ID needs to be a primary key ID
 
         with self.connection.cursor() as cursor:
+
+            column = "" if column is None else "*"
 
             try:
 
@@ -177,6 +172,7 @@ class PostPie:
 
         with self.connection.cursor() as cursor:
 
+            # args should be the names of the columns that are being requested
             columns = " , ".join(args) if args else '*'
             cursor.execute(f""" SELECT {columns} FROM {tableName} WHERE id = %s; """, [id])
 
@@ -195,7 +191,8 @@ class PostPie:
 
             # list(kwargs.values()) holds the dictionary values that will be placed in 
             # the place holders %s where column_values are, the [id] will placed into id = %s
-            cursor.execute( f"UPDATE {tableName} SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
+            cursor.execute( f"UPDATE {tableName}  SET {columns_values} WHERE id = %s;", list(kwargs.values()) + [ID])
+
             self.connection.commit()
 
     def add_column(self, tableName: str, **kwargs):
@@ -232,7 +229,7 @@ class PostPie:
             print(f'Column {columnName} dropped successfully!')
             self.connection.commit()
 
-    def create_foreign_key_table(self, tableName, fk_name=None, **kwargs):
+    def create_foreign_key_table(self, tableName, id : str = None, fk_name=None, **kwargs):
 
         # The Foriegn Key must be an ID which is a primary key
         
@@ -245,6 +242,7 @@ class PostPie:
 
         with self.connection.cursor() as cursor:
 
+            ID = id if id else "id"
             columns = ", ".join([f'{col} {kwargs[col]} ' for col in kwargs])
             fk_alterName = ''
 
@@ -256,27 +254,10 @@ class PostPie:
 
             fk = ", ".join([f'{fk_name} INT, CONSTRAINT fk_{fk_alterName} FOREIGN KEY({fk_name}) REFERENCES {fk_alterName}(id))'])
 
-            for col, d_type in kwargs.items():
-                if d_type.startswith("VARCHAR"):
+            check_data_types(kwargs=kwargs)
 
-                    try:
-                        # Grabs the integer value for VARCHAR(###)
-                        vchar_len = int(d_type[8:-1])
-
-                        if vchar_len <= 1 or vchar_len > 255:
-                            raise ValueError
-                        
-                    except ValueError:
-                        raise ValueError(f"ERROR! Invalid VARCHAR length for column name '{col}'")
-                    
-                elif d_type not in self.allowed_data_types:
-                    raise ValueError(f"ERROR! Invalid PostgreSQL datatype for column name '{col}' : {d_type}")
-
-            try:
-                cursor.execute(f""" CREATE TABLE {tableName} ( id SERIAL PRIMARY KEY, {columns}, 
-                            {fk}; """)
-            except:
-                print()
+            cursor.execute(f""" CREATE TABLE {tableName} ( {ID} SERIAL PRIMARY KEY, {columns}, {fk}; """)
+                #raise("ERROR! Table was not able to be created!")
             
             print(f'Table with foreign key successfully created!')
             self.connection.commit()
@@ -293,6 +274,57 @@ class PostPie:
                     break
                 fk_alterName += i
 
-            cursor.execute(f""" ALTER TABLE {tableName} ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
+            try:
 
+                # Adds the fk_name as a column into the table first before creating the foreign key
+                cursor.execute(f""" ALTER TABLE {tableName} ADD COLUMN {fk_name} INT, 
+                               ADD CONSTRAINT fk_{fk_alterName} FOREIGN KEY ({fk_name}) REFERENCES {fk_alterName}(id);""")
+            except:
+                raise('ERROR! Foreign key wasnt able to be added!')
+
+            print(f'Foreign Key added to table: {tableName}')
             self.connection.commit()
+    
+    def self_query(self, sqlCommand : str):
+
+        # Allows for custom SQL code to be written
+
+        with self.connection.cursor() as cursor:
+
+            try:
+                cursor.execute(sqlCommand)
+            except:
+                print("ERROR! SQL Command was not able to be executed!")
+        
+            print("SQL command was executed successfully!")
+            self.connection.commit()
+
+    def join(self, tableName : str, tables : list, on : str, where : str, *args : str) -> tuple:
+
+        # Tables that are being joined need to have a relationship
+        # so that the join can work properly.
+        # The Join will be use the table names ID to look up if they are
+        # in both tables
+
+        # Where and columns are optional inputs, they will be automatically handled if not entered
+        # Example for on: on = 'customer.orderID = orderID.orderID'
+
+
+        with self.connection.cursor() as cursor:
+
+            # formats the query so its a correct SQL query
+            WHERE = f"WHERE {where}" if where else ""                
+            columns = ", ".join(args) if args else '*'
+            tables = " ".join(f'JOIN {table} ON {on}' for table in tables)
+
+
+            cursor.execute(f""" SELECT {columns} FROM {tableName} {tables} {WHERE}; """)
+            
+            join_info = cursor.fetchall()
+            
+            self.connection.commit()
+
+            return join_info
+
+#py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
+#py.show_table('customer')

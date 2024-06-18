@@ -1,6 +1,16 @@
 CURRENT RELEASE
 ----------------
 
+PostPie 1.1.1
+****************
+- Add custom names for ID primary keys when creating a new table
+- Add data validator for data types
+- Add a custom query function
+- Fix add fk to table to where they dont need to add the name to the table first anymore
+- Add distinct look up option for show_custom_table_info
+- Add Joins
+- Update get_by_id to allow column to be an empty argument
+
 PostPie 1.0.2
 ****************
 
