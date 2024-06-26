@@ -325,6 +325,3 @@ class PostPie:
             self.connection.commit()
 
             return join_info
-
-#py = PostPie('localhost', 'postgres', 'postgres', 'MasterGaming1', 5432)
-#py.show_table('customer')
