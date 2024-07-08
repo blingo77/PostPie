@@ -1,6 +1,11 @@
 Notes for any changes or updates
 --------------------------------
 
+PostPie 1.1.1
+*************
+
+- Add connection pooling
+
 PostPie 1.1.0
 *************
 
