@@ -5,6 +5,12 @@
 import psycopg2
 from dataValidator import check_data_types
 from dataValidator import check_for_string
+from connection import Connect
+
+try:
+    from config import DB_CONFIG
+except:
+    print('No config.py file found')
 
 class PostPie:
     """ 
@@ -25,8 +31,18 @@ class PostPie:
     """
 
     # User must Connect to their PostgreSQL server with these credentials
-    def __init__(self, host_name : str, db_name : str, db_user : str, db_password : str, db_port : int):
-        self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
+    def __init__(self, host_name : str = None, db_name : str = None, db_user : str = None, db_password : str = None, db_port : int = None):
+        if host_name is not None:
+            self.connection = psycopg2.connect(host=host_name, dbname=db_name, user=db_user, password=db_password, port=db_port)
+        elif host_name is None:
+            self.connection = psycopg2.connect(
+                host=DB_CONFIG['host'], 
+                dbname=DB_CONFIG['database'], 
+                user=DB_CONFIG['user'], 
+                password=DB_CONFIG['password'], 
+                port=DB_CONFIG['port'])
+
+        #self.Con = Connect().init('postgres', 'postgres', 'MasterGaming1', 'localhost', 5432)
 
     def create_table(self, tableName : str, id : str = None, **kwargs):
         
@@ -324,3 +340,6 @@ class PostPie:
             self.connection.commit()
 
             return join_info
+
+py = PostPie()
+py.show_table('customer')
