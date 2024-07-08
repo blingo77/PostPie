@@ -1,12 +1,12 @@
 Notes for any changes or updates
 --------------------------------
 
-PostPie 1.1.1
+PostPie 1.1.2
 *************
 
 - Add connection pooling
 
-PostPie 1.1.0
+PostPie 1.1.1
 *************
 
 - Add custom names for ID primary keys when creating a new table

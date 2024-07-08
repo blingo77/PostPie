@@ -32,7 +32,6 @@ class PostPie:
         
         # CREATES A TABLE IF IT DOSENT EXIST ALREADY 
         # A id will be automatically made into the primary key for the table
-
         with self.connection.cursor() as cursor:
 
             # Allows user to create a custom name for the ID primary key
